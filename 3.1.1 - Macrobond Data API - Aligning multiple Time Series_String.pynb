@@ -1,0 +1,31 @@
+# List of series names
+series_names = ["cntrad1413", "jptrad0004", "intrad1801", "hktrad0011", "sgtrad0539", 
+                "krtrad0001", "twtrad0153", "thtrad0001"]
+
+# List to store SeriesEntry objects
+series_entries = []
+
+# Create SeriesEntry objects for each series name
+for name in series_names:
+    series_entries.append(SeriesEntry(missing_value_method=SeriesMissingValueMethod.NONE, name=name))
+
+# Fetch unified series
+data_frame = mda.get_unified_series(
+    *series_entries,
+    frequency=SeriesFrequency.ANNUAL,
+    currency="USD",
+    calendar_merge_mode=CalendarMergeMode.AVAILABLE_IN_ALL,
+    start_point=StartOrEndPoint.data_in_all_series(),
+    end_point=StartOrEndPoint.data_in_all_series(),
+).to_pd_data_frame()
+
+# Rename columns
+column_names = ["Dates", "China", "Japan", "India", "Hong Kong", "Singapore", 
+                "South Korea", "Taiwan", "Thailand"]
+data_frame.columns = column_names
+
+# Calculate annual percentage change for each series
+data_frame_pct_change = data_frame.set_index('Dates').pct_change(periods=1) * 100
+
+# Display the resulting DataFrame with annual percentage change
+print(data_frame_pct_change)
